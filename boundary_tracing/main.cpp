@@ -44,22 +44,6 @@ bool is_border(const std::vector<std::vector<int>> & image, int x, int y) {
     return false;
 }
 
-bool is_isolated(const std::vector<std::vector<int>> & image, Point p) {
-    int height = image.size();
-    int width = image[0].size();
-    for (int dy = -1; dy <= 1; dy++) {
-        for (int dx = -1; dx <= 1; dx++) {
-            if (dy == 0 && dx == 0) continue;
-            int ny = p.y + dy;
-            int nx = p.x + dx;
-            if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
-                if (image[ny][nx] == 1) return false; // not isolated because other foreground pixels found
-            }
-        }
-    }
-    return true;
-}
-
 Point raster_scan(const std::vector<std::vector<int>> & image, std::vector<std::vector<char>> & visited, const Point & curr) {
   int height = image.size();
   int width = image[0].size();
@@ -90,16 +74,9 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
   while (true) {
       curr = raster_scan(image, visisted, curr);
       bool not_found = is_invalid_point(curr);
-
       // no pixel found
       if (not_found) break;
     
-      // skip 1-pixel forground
-      if (is_isolated(image, curr)) {
-        visisted[curr.y][curr.x] = 1;
-        continue;
-      }
-
       // get contour
       std::vector<Point> contour;
       int dir = 7;
