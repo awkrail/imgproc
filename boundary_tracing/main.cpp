@@ -1,6 +1,8 @@
 #include<iostream>
 #include <vector>
 
+#include <opencv2/opencv.hpp> // image load, visualize, and save
+
 struct Point {
   int x;
   int y;
@@ -99,7 +101,9 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
             break;
           }
         }
-        if (!has_route) break; // foreground but inside the outer contour.
+
+        // foreground but inside the outer contour.
+        if (!has_route) break;
 
       } while (!is_start(curr, start));
 
@@ -109,8 +113,52 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
   return contours;
 }
 
+std::vector<std::vector<int>> load_image_as_binary(const char * filename) {
+  cv::Mat img = cv::imread(filename);
+  cv::Mat gray;
+  cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+  std::vector<std::vector<int>> image (gray.rows, std::vector<int>(gray.cols, 0));
+  for (int y = 0; y < gray.rows; y++) {
+    for (int x = 0; x < gray.cols; x++) {
+      int intensity = gray.at<unsigned char>(y, x) > 0 ? 1 : 0;
+      image[y][x] = intensity;
+    }
+  }
+  return image;
+}
+
+void visualize(std::vector<std::vector<int>> & image, std::vector<std::vector<Point>> & contours) {
+  int height = image.size();
+  int width = image[0].size();
+
+  cv::Mat vis(height, width, CV_8UC1);
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      vis.at<uchar>(y, x) = image[y][x] ? 255 : 0;
+    }
+  }
+
+  cv::Mat color;
+  cv::cvtColor(vis, color, cv::COLOR_GRAY2BGR);
+
+  /* visualize contour */
+  std::vector<cv::Scalar> color_list = { cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255) };
+
+  for (int i = 0; i < contours.size(); i++) {
+    auto c = color_list[i % 6];
+    for (int j = 0; j < contours[i].size() - 1; j++) {
+      cv::line(color, cv::Point(contours[i][j].x, contours[i][j].y), cv::Point(contours[i][j+1].x, contours[i][j+1].y), c, 1);
+    }
+  }
+
+  cv::imwrite("./images/output1.png", color);
+}
+
+
 int main()
 {
+  /**
   std::vector<std::vector<int>> image = {
       // 0 - 4
       {1,1,0,0,1, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
@@ -149,6 +197,8 @@ int main()
       {0,0,0,0,0, 0,1,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
       {0,0,0,0,0, 1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
   };
+  **/
+  std::vector<std::vector<int>> image = load_image_as_binary("images/test1.png");
 
   std::vector<std::vector<char>> visited(image.size(), std::vector<char>(image[0].size(), 0));
 
@@ -159,5 +209,6 @@ int main()
     }
     std::cout << std::endl;
   }
+  visualize(image, result);
   return 0;
 }

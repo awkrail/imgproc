@@ -1,0 +1,3 @@
+/home/awkrail/research/imgproc/boundary_tracing/build/CMakeFiles/main.dir
+/home/awkrail/research/imgproc/boundary_tracing/build/CMakeFiles/edit_cache.dir
+/home/awkrail/research/imgproc/boundary_tracing/build/CMakeFiles/rebuild_cache.dir
