@@ -65,6 +65,10 @@ bool is_invalid_point(const Point & p) {
   return false;
 }
 
+bool is_connceted_start(const Point & next, const Point & start) {
+  return next.x == start.x && next.y == start.y;
+}
+
 std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<int>> & image, std::vector<std::vector<char>> & visisted) {
   // raster scan
   const int width = image[0].size();
@@ -72,6 +76,8 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
 
   std::vector<std::vector<Point>> contours;
   Point curr = { 0, 0 };
+
+  bool has_route = false;
 
   while (true) {
       curr = raster_scan(image, visisted, curr);
@@ -86,14 +92,14 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
       contour.push_back(start);
 
       do {
-        visisted[curr.y][curr.x] = 1;
+        //visisted[curr.y][curr.x] = 1;
         Point next;
-        bool has_route = false;
+        has_route = false;
         for (int i = 0; i < 8; i++) {
           int d = (dir + i + 6) % 8;
           next.x = curr.x + directions[d][0];
           next.y = curr.y + directions[d][1];
-          if (in_image(next, width, height) && image[next.y][next.x] == 1 && visisted[next.y][next.x] != 1) {
+          if (in_image(next, width, height) && image[next.y][next.x] == 1 && visisted[next.y][next.x] != 1 && is_border(image, next.x, next.y)) {
             contour.push_back(next);
             dir = d;
             curr = next;
@@ -101,13 +107,14 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
             break;
           }
         }
-
         // foreground but inside the outer contour.
         if (!has_route) break;
 
       } while (!is_start(curr, start));
 
-    if (contour.size() > 1) contours.push_back(contour);
+    for (const auto & c : contour) visisted[c.y][c.x] = 1;
+    if (contour.size() > 1 && has_route) contours.push_back(contour);
+
   }
   
   return contours;
@@ -152,7 +159,7 @@ void visualize(std::vector<std::vector<int>> & image, std::vector<std::vector<Po
     }
   }
 
-  cv::imwrite("./images/output2.png", color);
+  cv::imwrite("./images/output11.png", color);
 }
 
 
@@ -198,7 +205,7 @@ int main()
       {0,0,0,0,0, 1,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0},
   };
   **/
-  std::vector<std::vector<int>> image = load_image_as_binary("images/test2.png");
+  std::vector<std::vector<int>> image = load_image_as_binary("images/test1.png");
 
   std::vector<std::vector<char>> visited(image.size(), std::vector<char>(image[0].size(), 0));
 
