@@ -1,13 +1,12 @@
 #include<iostream>
 #include <vector>
 #include <cmath>
-
-#include <opencv2/opencv.hpp> // image load, visualize, and save
-
+#include <opencv2/opencv.hpp> // For loading and visualizing images
 #include "graham_scan.h"
 
 // x, y
-int directions[8][2] = {
+int directions[8][2] = 
+{
   {-1,  1},
   { 0,  1},
   { 1,  1},
@@ -18,17 +17,18 @@ int directions[8][2] = {
   {-1,  0}
 };
 
-bool in_image(const Point p, const int width, const int height) {
-  if (p.x >= 0 && p.y >= 0 && p.x < width && p.y < height) return true;
-  return false;
+inline bool in_image(const Point p, const int width, const int height) 
+{
+  return p.x >= 0 && p.y >= 0 && p.x < width && p.y < height;
 }
 
-bool is_start(const Point & curr, const Point & start) {
-  if (curr.x == start.x && curr.y == start.y) return true;
-  return false;
+inline bool is_start(const Point & curr, const Point & start)
+{
+  return curr.x == start.x && curr.y == start.y;
 }
 
-bool is_border(const std::vector<std::vector<int>> & image, int x, int y) {
+inline bool is_border(const std::vector<std::vector<int>> & image, int x, int y) 
+{
     int height = image.size();
     int width = image[0].size();
     
@@ -44,7 +44,10 @@ bool is_border(const std::vector<std::vector<int>> & image, int x, int y) {
     return false;
 }
 
-Point raster_scan(const std::vector<std::vector<int>> & image, std::vector<std::vector<char>> & visited, const Point & curr) {
+Point raster_scan(const std::vector<std::vector<int>> & image, 
+                  std::vector<std::vector<char>> & visited,
+                  const Point & curr) 
+{
   int height = image.size();
   int width = image[0].size();
   
@@ -58,12 +61,14 @@ Point raster_scan(const std::vector<std::vector<int>> & image, std::vector<std::
   return { -1, -1 };
 }
 
-bool is_invalid_point(const Point & p) {
-  if (p.x == -1 && p.y == -1) return true;
-  return false;
+inline bool is_invalid_point(const Point & p) 
+{
+  return p.x == -1 && p.y == -1;
 }
 
-std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<int>> & image, std::vector<std::vector<char>> & visisted) {
+std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<int>> & image, 
+                                                std::vector<std::vector<char>> & visisted) 
+{
   // raster scan
   const int width = image[0].size();
   const int height = image.size();
@@ -111,7 +116,8 @@ std::vector<std::vector<Point>> contour_tracing(const std::vector<std::vector<in
   return contours;
 }
 
-std::vector<std::vector<int>> load_image_as_binary(const char * filename) {
+std::vector<std::vector<int>> load_image_as_binary(const char * filename) 
+{
   cv::Mat img = cv::imread(filename);
   cv::Mat gray;
   cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
@@ -125,7 +131,9 @@ std::vector<std::vector<int>> load_image_as_binary(const char * filename) {
   return image;
 }
 
-void visualize(std::vector<std::vector<int>> & image, std::vector<FloatPoint> & box) {
+void visualize(std::vector<std::vector<int>> & image, 
+               std::vector<FloatPoint> & box) 
+{
   int height = image.size();
   int width = image[0].size();
 
@@ -142,14 +150,27 @@ void visualize(std::vector<std::vector<int>> & image, std::vector<FloatPoint> & 
 
   /* visualize contour */
   auto c = cv::Scalar(0, 255, 0);
-  cv::line(color, cv::Point((int)box[0].x, (int)box[0].y), cv::Point((int)box[1].x, (int)box[1].y), c, 2);
-  cv::line(color, cv::Point((int)box[0].x, (int)box[0].y), cv::Point((int)box[3].x, (int)box[3].y), c, 2);
-  cv::line(color, cv::Point((int)box[1].x, (int)box[1].y), cv::Point((int)box[2].x, (int)box[2].y), c, 2);
-  cv::line(color, cv::Point((int)box[2].x, (int)box[2].y), cv::Point((int)box[3].x, (int)box[3].y), c, 2);
-  cv::imwrite("./images/rect.png", color);
+  cv::line(color,
+      cv::Point((int)box[0].x, (int)box[0].y),
+      cv::Point((int)box[1].x, (int)box[1].y), 
+      c, 2);
+  cv::line(color, 
+      cv::Point((int)box[0].x, (int)box[0].y),
+      cv::Point((int)box[3].x, (int)box[3].y), 
+      c, 2);
+  cv::line(color, 
+      cv::Point((int)box[1].x, (int)box[1].y),
+      cv::Point((int)box[2].x, (int)box[2].y), 
+      c, 2);
+  cv::line(color, 
+      cv::Point((int)box[2].x, (int)box[2].y),
+      cv::Point((int)box[3].x, (int)box[3].y),
+      c, 2);
+  cv::imwrite("images/output.png", color);
 }
 
-std::vector<FloatPoint> rotate_angle(std::vector<Point> points, float angle) {
+std::vector<FloatPoint> rotate_angle(std::vector<Point> points, float angle) 
+{
   /**
   C++ version of rotating vectors
   rotation = np.array([
@@ -166,7 +187,8 @@ std::vector<FloatPoint> rotate_angle(std::vector<Point> points, float angle) {
   return rotated;
 }
 
-std::vector<FloatPoint> rotate_angle_reverse(std::vector<FloatPoint> points, float angle) {
+std::vector<FloatPoint> rotate_angle_reverse(std::vector<FloatPoint> points, float angle) 
+{
   /**
   C++ version of rotating vectors
   rotation = np.array([
@@ -183,31 +205,25 @@ std::vector<FloatPoint> rotate_angle_reverse(std::vector<FloatPoint> points, flo
   return rotated;
 }
 
-std::tuple<float, float> minmax_x(std::vector<FloatPoint> rotated) {
-  float min_val = std::numeric_limits<float>::max();
-  float max_val = std::numeric_limits<float>::min();
+std::tuple<float, float, float, float> minmax(std::vector<FloatPoint> points) 
+{
+  float min_x = std::numeric_limits<float>::max();
+  float max_x = std::numeric_limits<float>::min();
+  float min_y = std::numeric_limits<float>::max();
+  float max_y = std::numeric_limits<float>::min();
   
-  for (auto & p : rotated) {
-    if (p.x < min_val) min_val = p.x;
-    if (p.x > max_val) max_val = p.x;
+  for (auto & p : points) {
+    if (p.x < min_x) min_x = p.x;
+    if (p.x > max_x) max_x = p.x;
+    if (p.y < min_y) min_y = p.y;
+    if (p.y > max_y) max_y = p.y;
   }
 
-  return { min_val, max_val };
+  return { min_x, max_x, min_y, max_y };
 }
 
-std::tuple<float, float> minmax_y(std::vector<FloatPoint> rotated) {
-  float min_val = std::numeric_limits<float>::max();
-  float max_val = std::numeric_limits<float>::min();
-  
-  for (auto & p : rotated) {
-    if (p.y < min_val) min_val = p.y;
-    if (p.y > max_val) max_val = p.y;
-  }
-
-  return { min_val, max_val };
-}
-
-std::vector<FloatPoint> min_area_rect(std::vector<Point> & hull) {
+std::vector<FloatPoint> min_area_rect(std::vector<Point> & hull) 
+{
   float min_area = std::numeric_limits<float>::max();
   std::vector<FloatPoint> best_rect;
 
@@ -218,9 +234,7 @@ std::vector<FloatPoint> min_area_rect(std::vector<Point> & hull) {
     float angle = - std::atan2(p2.y - p1.y, p2.x - p1.x);
     std::vector<FloatPoint> rotated = rotate_angle(hull, angle);
 
-    // todo: obtain min_x, min_y, max_x, max_y
-    auto [min_x, max_x] = minmax_x(rotated);
-    auto [min_y, max_y] = minmax_y(rotated);
+    auto [min_x, max_x, min_y, max_y] = minmax(rotated);
     float area = (max_x - min_x) * (max_y - min_y);
     
     if (area < min_area) {
@@ -237,10 +251,9 @@ std::vector<FloatPoint> min_area_rect(std::vector<Point> & hull) {
   return best_rect;
 }
 
-
 int main()
 {
-  std::vector<std::vector<int>> image = load_image_as_binary("images/test2.png");
+  std::vector<std::vector<int>> image = load_image_as_binary("images/test.png");
   std::vector<std::vector<char>> visited(image.size(), std::vector<char>(image[0].size(), 0));
   std::vector<std::vector<Point>> contours = contour_tracing(image, visited);
 
